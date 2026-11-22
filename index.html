@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How fast can you be debt-free?</title>
+<meta name="description" content="Compare avalanche and snowball payoff plans, with extra monthly, biweekly or weekly payments. Free, runs in your browser.">
+
+<!-- Link preview tags. If you use a different web address, change debt-free-calculator.vercel.app below. -->
+<meta property="og:url" content="https://debt-free-calculator.vercel.app/">
+<meta property="og:site_name" content="The Open Gate Fables">
+<meta name="theme-color" content="#0f2350">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%9A%AA%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How fast can you be debt-free?">
+<meta property="og:description" content="Compare two payoff strategies and see how extra payments cut your interest. Free, runs in your browser.">
+<meta property="og:image" content="https://debt-free-calculator.vercel.app/og-1200x630.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How fast can you be debt-free?">
+<meta name="twitter:description" content="Compare two payoff strategies and see how extra payments cut your interest. Free, runs in your browser.">
+<meta name="twitter:image" content="https://debt-free-calculator.vercel.app/og-1200x630.png">
+
+<style>
+:root{--ink:#1d2330;--muted:#5f6675;--line:#e5e7eb;--accent:#2f6fdb;--accent2:#e0701b;--bg:#f7f8fa;--card:#fff;--warn:#b42318}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:14px 14px 32px}
+
+/* Top bar: channel name and call to action */
+.brand{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin:0 0 10px}
+.brand b{color:var(--ink)}
+
+h1{font-size:24px;line-height:1.2;margin:2px 0 6px}
+.sub{color:var(--muted);margin:0 0 12px}
+.disclaimer{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:10px 12px;font-size:14px;margin:0 0 14px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card.winner{border:2px solid var(--accent)}
+h2{font-size:17px;margin:0 0 10px}
+.label{color:var(--muted);font-size:13px}
+.example{background:#eef4ff;border-radius:8px;padding:8px 10px;font-size:14px;margin:0 0 12px;color:#1e3a8a}
+
+/* Form controls: 16px font stops iOS from zooming in, 44px height is an easy touch target */
+input,select,button{font:inherit;font-size:16px}
+input[type=text],input[type=number],select{width:100%;min-height:44px;padding:8px 10px;border:1px solid #cfd4dc;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+button{min-height:44px;padding:8px 14px;border:1px solid #cfd4dc;background:#fff;color:var(--ink);border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.field{display:block;min-width:0}
+.field span{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+
+/* Debts as cards: no sideways scrolling on phones */
+.debt{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:#fcfcfd}
+.debt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.debt-head strong{font-size:14px;color:var(--muted)}
+.row-del{min-height:44px;min-width:44px;padding:0;border:none;background:none;color:var(--muted);font-size:26px;line-height:1}
+.debt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1 / -1}
+.add-row{margin-top:10px}
+
+.extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.extra-grid .full{grid-column:1 / -1}
+.range{width:100%;margin:6px 0 0}
+
+.budget-grid{display:grid;grid-template-columns:1fr;gap:10px}
+
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+.stat{font-size:22px;font-weight:700;margin-bottom:8px}
+
+#warn,#budgetWarn{color:var(--warn);font-weight:600;margin:8px 0 0;min-height:0}
+#diff{margin:8px 0 0;font-weight:600}
+
+svg{width:100%;height:auto;display:block}
+.legend span{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:4px}
+
+/* Schedule is hidden until asked for */
+.sched-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sched-head h2{margin:0}
+.sched-tools{display:flex;gap:8px;flex-wrap:wrap}
+.sched-tools select{width:auto;min-width:140px}
+.sched-wrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-size:14px;white-space:nowrap}
+.sched th{position:sticky;top:0;background:#fff}
+
+.foot{color:var(--muted);font-size:13px;margin:8px 0 0}
+.site-foot{text-align:center;color:var(--muted);font-size:14px;margin-top:18px}
+
+@media(min-width:600px){
+  .debt-grid{grid-template-columns:repeat(3,1fr)}
+  .minf{grid-column:auto}
+  .budget-grid{grid-template-columns:1fr 1fr}
+  .extra-grid{grid-template-columns:1fr 1fr 1fr}
+  .extra-grid .range-cell{grid-column:1 / -1}
+  h1{font-size:28px}
+}
+@media(min-width:700px){
+  .grid{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .noprint{display:none!important}
+  body{background:#fff}
+  main{padding:0}
+  .card{border:none;padding:0;margin:0 0 12px}
+  .sched-wrap{max-height:none;overflow:visible;border:none}
+  #schedBox[hidden]{display:block!important}
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:16px;font-weight:600">This calculator needs JavaScript. Please turn it on and reload.</p></noscript>
+<main>
+
+<div class="brand noprint">
+  <span><b>The Open Gate Fables</b></span>
+  <span>Follow for more money tips</span>
+</div>
+
+<h1>How fast can you be debt-free?</h1>
+<p class="sub">Enter your debts, then compare two payoff strategies. Everything runs in your browser. Nothing is sent anywhere.</p>
+<p class="disclaimer"><b>Estimates only, not financial advice.</b> Lenders may calculate interest differently. Check your loan statements before you make a plan.</p>
+
+<section class="card noprint">
+  <h2>Your debts</h2>
+  <p class="example">Example numbers: replace them with your own debts.</p>
+  <div id="debts"></div>
+  <button id="add" class="add-row" type="button">+ Add debt</button>
+
+  <div class="extra-grid">
+    <div class="full">
+      <span class="label">Extra payment</span>
+      <input type="range" id="extraRange" class="range" min="0" max="2000" step="25" value="200" aria-label="Extra payment slider">
+    </div>
+    <label class="field">
+      <span class="label">Amount ($)</span>
+      <input type="number" id="extraNum" min="0" step="25" value="200" aria-label="Extra payment amount">
+    </label>
+    <label class="field">
+      <span class="label">How often</span>
+      <select id="extraFreq" aria-label="How often you make the extra payment">
+        <option value="monthly">per month</option>
+        <option value="biweekly">every 2 weeks</option>
+        <option value="weekly">per week</option>
+      </select>
+    </label>
+    <p id="extraMonthly" class="label full" style="margin:0"></p>
+  </div>
+  <p id="warn" role="alert"></p>
+</section>
+
+<section class="card noprint">
+  <h2>Monthly budget <span class="label">(optional)</span></h2>
+  <div class="budget-grid">
+    <label class="field">
+      <span class="label">Take-home income per month ($)</span>
+      <input type="number" id="income" min="0" step="50" placeholder="0" aria-label="Monthly take-home income">
+    </label>
+    <label class="field">
+      <span class="label">Living expenses per month ($)</span>
+      <input type="number" id="expenses" min="0" step="50" placeholder="0" aria-label="Monthly living expenses">
+    </label>
+  </div>
+  <p id="budgetLine" class="label" style="margin:10px 0 0"></p>
+  <p id="budgetWarn"></p>
+</section>
+
+<section class="grid">
+  <div class="card" id="cardAv">
+    <h2>Avalanche <span class="label">(highest rate first)</span></h2>
+    <div class="label">Debt-free by</div>
+    <div class="stat" id="avDate">-</div>
+    <div class="label">Total interest</div>
+    <div class="stat" id="avInt">-</div>
+    <div class="label" id="avMonths"></div>
+  </div>
+  <div class="card" id="cardSn">
+    <h2>Snowball <span class="label">(smallest balance first)</span></h2>
+    <div class="label">Debt-free by</div>
+    <div class="stat" id="snDate">-</div>
+    <div class="label">Total interest</div>
+    <div class="stat" id="snInt">-</div>
+    <div class="label" id="snMonths"></div>
+  </div>
+</section>
+<p id="diff"></p>
+
+<section class="card">
+  <h2>Balance over time</h2>
+  <svg id="chart" viewBox="0 0 800 340" role="img" aria-label="Chart of total balance by month for each strategy"></svg>
+  <p class="label legend"><span style="background:#2f6fdb"></span>Avalanche &nbsp; <span style="background:repeating-linear-gradient(90deg,#e0701b 0 5px,transparent 5px 8px);height:4px"></span>Snowball (dashed)</p>
+</section>
+
+<section class="card">
+  <div class="sched-head">
+    <h2>Monthly schedule</h2>
+    <div class="sched-tools noprint">
+      <button id="toggleSched" type="button" aria-expanded="false" aria-controls="schedBox">Show schedule</button>
+    </div>
+  </div>
+  <div id="schedBox" hidden>
+    <div class="sched-head noprint">
+      <span class="label">Strategy: <span id="schedName">Avalanche</span></span>
+      <div class="sched-tools">
+        <select id="schedPick" aria-label="Choose strategy for schedule">
+          <option value="avalanche">Avalanche</option>
+          <option value="snowball">Snowball</option>
+        </select>
+        <button type="button" onclick="window.print()">Print plan</button>
+      </div>
+    </div>
+    <div class="sched-wrap"><table id="sched"></table></div>
+  </div>
+  <p class="foot">Estimates only, not financial advice. Interest is charged monthly on the current balance.</p>
+</section>
+
+<p class="site-foot noprint"><b>The Open Gate Fables</b> · Follow for more money tips · New money fable every day</p>
+</main>
+
+<script>
+const MAX = 600; // stop after 50 years
+const fmt = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+const fmt2 = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let debts = [
+  {name:'Credit card',   balance:4200,  apr:24.99, min:120},
+  {name:'Car loan',      balance:8500,  apr:6.5,   min:210},
+  {name:'Student loan',  balance:15000, apr:5.2,   min:160},
+  {name:'Personal loan', balance:2000,  apr:11,    min:75}
+];
+let last = null;
+
+function dateFor(m, style = 'long'){
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth() + m, 1)
+    .toLocaleDateString('en-US', {month: style, year: 'numeric'});
+}
+
+// Month-by-month simulation. Every open debt gets its minimum; all leftover
+// budget (including minimums freed by paid-off debts) goes to the target debt.
+function simulate(strategy, extra){
+  const bal  = debts.map(d => Math.max(0, +d.balance || 0));
+  const rate = debts.map(d => Math.max(0, +d.apr || 0) / 1200);
+  const apr  = debts.map(d => +d.apr || 0);
+  const min  = debts.map(d => Math.max(0, +d.min || 0));
+  const budget = debts.reduce((s, d, i) => s + (bal[i] > 0 ? min[i] : 0), 0) + extra;
+  const series = [bal.reduce((s, v) => s + v, 0)];
+  const rows = [];
+  let interest = 0, month = 0;
+  const anyOpen = () => bal.some(v => v > 0.005);
+
+  while (anyOpen() && month < MAX){
+    month++;
+    bal.forEach((v, i) => { if (v > 0){ const x = v * rate[i]; bal[i] += x; interest += x; } });
+
+    const pay = debts.map(() => 0);
+    let left = budget;
+    bal.forEach((v, i) => {
+      if (v > 0){ const p = Math.min(min[i], v); bal[i] -= p; pay[i] += p; left -= p; }
+    });
+
+    const order = bal.map((v, i) => i)
+      .filter(i => bal[i] > 0.005)
+      .sort((i, j) => strategy === 'avalanche' ? apr[j] - apr[i] : bal[i] - bal[j]);
+    for (const i of order){
+      if (left <= 0) break;
+      const p = Math.min(left, bal[i]);
+      bal[i] -= p; pay[i] += p; left -= p;
+    }
+    bal.forEach((v, i) => { if (v <= 0.005) bal[i] = 0; });
+
+    const total = pay.reduce((s, v) => s + v, 0);
+    const remain = bal.reduce((s, v) => s + v, 0);
+    rows.push({month, pay, total, left: remain});
+    series.push(remain);
+  }
+  return {rows, series, interest, months: month, notPaid: anyOpen(), names: debts.map(d => d.name || 'Untitled')};
+}
+
+// Each debt is a card: name on top, then balance, APR and minimum.
+function renderDebts(){
+  const box = $('debts');
+  box.innerHTML = '';
+  const keys = ['name', 'balance', 'apr', 'min'];
+  debts.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'debt';
+    card.innerHTML =
+      `<div class="debt-head"><strong>Debt ${i + 1}</strong>` +
+      `<button class="row-del" type="button" aria-label="Remove debt ${i + 1}">×</button></div>` +
+      `<div class="debt-grid">` +
+        `<label class="field full"><span>Name</span><input type="text"></label>` +
+        `<label class="field"><span>Balance ($)</span><input type="number" min="0" step="1"></label>` +
+        `<label class="field"><span>APR (%)</span><input type="number" min="0" step="0.01"></label>` +
+        `<label class="field minf"><span>Minimum ($/mo)</span><input type="number" min="0" step="1"></label>` +
+      `</div>`;
+    card.querySelectorAll('input').forEach((inp, k) => {
+      inp.value = d[keys[k]];
+      inp.setAttribute('aria-label', keys[k] + ' for debt ' + (i + 1));
+      inp.oninput = () => {
+        d[keys[k]] = k === 0 ? inp.value : (parseFloat(inp.value) || 0);
+        recalc();
+      };
+    });
+    card.querySelector('.row-del').onclick = () => { debts.splice(i, 1); renderDebts(); recalc(); };
+    box.appendChild(card);
+  });
+}
+
+// Turns the extra payment (per month, per 2 weeks, or per week) into a monthly average.
+function updateBudget(extra){
+  const income = parseFloat($('income').value) || 0;
+  const exp = parseFloat($('expenses').value) || 0;
+  const mins = debts.reduce((s, d) => s + ((+d.balance || 0) > 0 ? (+d.min || 0) : 0), 0);
+  const room = income - exp - mins;
+  $('budgetWarn').textContent = '';
+  if (income <= 0){
+    $('budgetLine').textContent = 'Enter your take-home income to see how much is left for extra payments.';
+    return;
+  }
+  $('budgetLine').textContent =
+    `Left after expenses: ${fmt.format(income - exp)}. Minimum payments: ${fmt.format(mins)}. ` +
+    `Room for extra payments: ${fmt.format(Math.max(room, 0))} a month.`;
+  if (extra > room + 0.5){
+    $('budgetWarn').textContent = `Your extra payment is ${fmt.format(extra - room)} a month more than your budget allows.`;
+  }
+}
+
+function drawChart(a, s){
+  const W = 800, H = 340, PL = 120, PB = 50, PT = 10, PR = 20;
+  const n = Math.max(a.series.length, s.series.length);
+  const max = Math.max(...a.series, ...s.series, 1);
+  const x = i => PL + (i / Math.max(n - 1, 1)) * (W - PL - PR);
+  const y = v => H - PB - (v / max) * (H - PB - PT);
+  const line = (arr, c, dash) => `<polyline fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"${dash ? ' stroke-dasharray="10 8"' : ''} points="${arr.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ')}"/>`;
+  $('chart').innerHTML =
+    `<line x1="${PL}" y1="${H - PB}" x2="${W - PR}" y2="${H - PB}" stroke="#cfd4dc" stroke-width="2"/>` +
+    `<text x="8" y="${y(max) + 8}" font-size="22" fill="#5f6675">${fmt.format(max)}</text>` +
+    `<text x="8" y="${H - PB + 8}" font-size="22" fill="#5f6675">$0</text>` +
+    `<text x="${PL}" y="${H - PB + 40}" font-size="22" fill="#5f6675">Month 0</text>` +
+    `<text x="${W - PR}" y="${H - PB + 40}" text-anchor="end" font-size="22" fill="#5f6675">Month ${n - 1}</text>` +
+    line(a.series, '#2f6fdb') + line(s.series, '#e0701b', true);
+}
+
+function renderSchedule(res){
+  const names = res.names;
+  let h = '<thead><tr><th>Month</th><th>Date</th>' +
+    names.map(n => `<th>${esc(n)}</th>`).join('') +
+    '<th>Total paid</th><th>Left owed</th></tr></thead><tbody>';
+  res.rows.forEach(r => {
+    h += `<tr><td>${r.month}</td><td>${dateFor(r.month, 'short')}</td>` +
+      r.pay.map(p => `<td>${p > 0.005 ? fmt2.format(p) : '&mdash;'}</td>`).join('') +
+      `<td>${fmt2.format(r.total)}</td><td>${fmt2.format(r.left)}</td></tr>`;
+  });
+  $('sched').innerHTML = h + '</tbody>';
+}
+
+function currentPick(){
+  const v = $('schedPick').value;
+  return last && last[v] ? v : 'avalanche';
+}
+
+function recalc(){
+  const amount = Math.max(0, parseFloat($('extraNum').value) || 0);
+  const freq = $('extraFreq').value;
+  const perYear = {monthly: 12, biweekly: 26, weekly: 52}[freq] || 12;
+  const extra = amount * perYear / 12;
+  $('extraRange').value = Math.min(2000, amount);
+  $('extraMonthly').textContent = freq === 'monthly' ? '' : `That is about ${fmt.format(extra)} a month on average.`;
+  updateBudget(extra);
+  $('warn').textContent = '';
+  $('diff').textContent = '';
+
+  if (!debts.some(d => (+d.balance || 0) > 0)){
+    $('warn').textContent = 'Enter at least one balance to see your payoff plan.';
+    return;
+  }
+
+  const a = simulate('avalanche', extra);
+  const s = simulate('snowball', extra);
+  last = {avalanche: a, snowball: s};
+
+  const fill = (res, p) => {
+    $(p + 'Date').textContent = res.notPaid ? 'Never at these payments' : dateFor(res.months);
+    $(p + 'Int').textContent = fmt.format(res.interest);
+    $(p + 'Months').textContent = res.notPaid ? 'Raise a minimum or the extra payment' : res.months + ' months';
+  };
+  fill(a, 'av');
+  fill(s, 'sn');
+
+  $('cardAv').classList.toggle('winner', a.interest < s.interest - 1);
+  $('cardSn').classList.toggle('winner', s.interest < a.interest - 1);
+
+  if (a.notPaid || s.notPaid){
+    $('warn').textContent = 'At least one debt never gets paid off at these payments. Raise its minimum or the extra payment.';
+  } else {
+    const diff = s.interest - a.interest;
+    const monthGap = s.months - a.months;
+    if (diff > 1){
+      $('diff').textContent = `Avalanche saves ${fmt.format(diff)} in interest` +
+        (monthGap > 0 ? ` and finishes ${monthGap} month${monthGap === 1 ? '' : 's'} sooner.` : '.');
+    } else if (diff < -1){
+      $('diff').textContent = `Snowball saves ${fmt.format(-diff)} in interest here.`;
+    } else {
+      $('diff').textContent = 'Both strategies cost about the same interest with these numbers.';
+    }
+  }
+
+  drawChart(a, s);
+  const pick = currentPick();
+  $('schedName').textContent = pick === 'avalanche' ? 'Avalanche' : 'Snowball';
+  if (!$('schedBox').hidden) renderSchedule(last[pick]);
+}
+
+$('add').onclick = () => { debts.push({name: '', balance: 0, apr: 0, min: 0}); renderDebts(); recalc(); };
+$('extraRange').oninput = e => { $('extraNum').value = e.target.value; recalc(); };
+$('extraNum').oninput = recalc;
+$('extraFreq').onchange = recalc;
+$('income').oninput = recalc;
+$('expenses').oninput = recalc;
+$('schedPick').onchange = recalc;
+$('toggleSched').onclick = () => {
+  const box = $('schedBox');
+  box.hidden = !box.hidden;
+  const btn = $('toggleSched');
+  btn.textContent = box.hidden ? 'Show schedule' : 'Hide schedule';
+  btn.setAttribute('aria-expanded', String(!box.hidden));
+  if (!box.hidden && last) renderSchedule(last[currentPick()]);
+};
+
+renderDebts();
+recalc();
+</script>
+</body>
+</html>
